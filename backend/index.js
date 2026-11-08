@@ -37,6 +37,7 @@ const APP_PORT = process.env.PORT;
 app.listen(APP_PORT, async () => {
   try {
     await database.authenticate();
+    console.log("Database connected successfully!");
     console.log(`Server is running on port ${APP_PORT}`);
   } catch (error) {
     console.error(error);

@@ -7,7 +7,12 @@ const database = new Sequelize({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   host: process.env.DB_HOST,
+  port: 3306,
   logging: false,
+  pool:{
+    max: 2,
+    min: 1,
+  }
 });
 
 module.exports = database;
