@@ -116,15 +116,8 @@ class TaskService {
 
   async getTasksByDate({ authId, date }) {
     try {
-      const { firstDayOfWeek, lastDayOfWeek } =
-        DateHelper.getThisWeekStartAndEndDate();
 
       const selectedDate = new Date(date);
-      if (selectedDate < firstDayOfWeek || selectedDate > lastDayOfWeek) {
-        throw new Error(
-          "Selected date is outside the current week. You can only view tasks within the current week (Monday to Sunday).",
-        );
-      }
 
       const startOfDay = new Date(selectedDate);
       startOfDay.setHours(0, 0, 0, 0);
