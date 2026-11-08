@@ -15,9 +15,26 @@ class TasksController {
    * @param {response} res
    */
   createTaskHandler = async (req, res) => {
-    const { title, description, priority, status, date, time, userId } =
-      req.body;
-    if (!title || !priority || !status || !date || !time || !userId) {
+    const {
+      title,
+      description,
+      priority,
+      status,
+      date,
+      startTime,
+      endTime,
+      userId,
+    } = req.body;
+
+    if (
+      !title ||
+      !priority ||
+      !status ||
+      !date ||
+      !startTime ||
+      !endTime ||
+      !userId
+    ) {
       return res.status(HTTP_CODES.NOT_FOUND).json({
         message: "Please provide all required fields",
       });
@@ -31,7 +48,8 @@ class TasksController {
         priority,
         status,
         date,
-        time,
+        startTime,
+        endTime,
         authId: userId,
         transactionId,
       });
@@ -127,7 +145,7 @@ class TasksController {
    */
   getTasksByDateHandler = async (req, res) => {
     const { date, userId } = req.body;
-    
+
     if (!date || !userId) {
       return res.status(HTTP_CODES.BAD_REQUEST).json(
         API_RESPONSE.ERROR({
@@ -236,7 +254,11 @@ class TasksController {
       );
     }
 
-    if (!searchQuery || typeof searchQuery !== "string" || searchQuery.trim() === "") {
+    if (
+      !searchQuery ||
+      typeof searchQuery !== "string" ||
+      searchQuery.trim() === ""
+    ) {
       return res.status(HTTP_CODES.OK).json(
         API_RESPONSE.SUCCESS({
           message: "Tasks fetched successfully",

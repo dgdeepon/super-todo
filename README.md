@@ -130,12 +130,13 @@ To protect backend infrastructure and hide internal ports and domains from brows
   - `title`: Short descriptive title.
   - `description`: Detailed notes or task details.
   - `date`: Restricted to the current ISO week (`YYYY-MM-DD`).
-  - `time`: Scheduled time (`HH:MM`).
+  - `startTime`: Scheduled start time (`HH:MM`).
+  - `endTime`: Scheduled end time (`HH:MM`).
   - `priority`: `low` (Emerald), `medium` (Amber), `high` (Red/Rose).
   - `status`: `in_progress` (default) or `completed`.
-- **Chronological Sorting**: Tasks within any given day are sorted by time ascending.
+- **Chronological Sorting**: Tasks within any given day are sorted by start time ascending.
 - **One-Click Completion**: Custom checkbox toggles task status between `in_progress` and `completed` with immediate strikethrough styling and cache invalidation.
-- **Task Drawer**: Slide-over drawer on PC; bottom sheet on mobile. Supports creating new tasks and editing existing tasks.
+- **Task Drawer**: Slide-over drawer on PC; bottom sheet on mobile. Supports creating new tasks and editing existing tasks, with start and end times laid out side-by-side in the same row.
 
 ---
 
@@ -179,8 +180,8 @@ To protect backend infrastructure and hide internal ports and domains from brows
 ### Task Routes (`/api/tasks`)
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/tasks` | Create a new task for the current week |
-| `PUT` | `/api/tasks` | Update an existing task (title, status, priority, time, etc.) |
+| `POST` | `/api/tasks` | Create a new task with `startTime` & `endTime` for the current week |
+| `PUT` | `/api/tasks` | Update an existing task (title, status, priority, startTime, endTime, etc.) |
 | `DELETE` | `/api/tasks` | Delete a task by ID |
 | `POST` | `/api/tasks/by-date` | Get all tasks for a specific date (`YYYY-MM-DD`) |
 | `GET` | `/api/tasks/count-summary` | Get weekly summary counts (total, completed, pending) |

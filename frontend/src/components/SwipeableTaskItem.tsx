@@ -131,10 +131,13 @@ export default function SwipeableTaskItem({
               {task.title}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              {task.time && (
+              {(task.startTime) && (
                 <span className="flex items-center gap-1 text-[11px] text-slate-400">
                   <Clock className="w-3 h-3" />
-                  <span>{task.time.slice(0, 5)}</span>
+                  <span>
+                    {(task.startTime || "").slice(0, 5)}
+                    {task.endTime ? ` - ${task.endTime.slice(0, 5)}` : ""}
+                  </span>
                 </span>
               )}
               {task.priority && (

@@ -13,7 +13,8 @@ class TaskService {
     priority,
     status,
     date,
-    time,
+    startTime,
+    endTime,
     authId,
     transactionId,
   }) {
@@ -25,7 +26,8 @@ class TaskService {
           priority,
           status,
           date,
-          time,
+          startTime,
+          endTime,
           authId,
         },
         {
@@ -44,7 +46,8 @@ class TaskService {
     priority,
     status,
     date,
-    time,
+    startTime,
+    endTime,
     authId,
     transactionId,
   }) {
@@ -55,7 +58,8 @@ class TaskService {
         ...(priority ? { priority: priority } : {}),
         ...(status ? { status: status } : {}),
         ...(date ? { date: date } : {}),
-        ...(time ? { time: time } : {}),
+        ...(startTime ? { startTime } : {}),
+        ...(endTime ? { endTime } : {}),
       };
       await this.taskModel.update(body, {
         where: {
@@ -116,7 +120,6 @@ class TaskService {
 
   async getTasksByDate({ authId, date }) {
     try {
-
       const selectedDate = new Date(date);
 
       const startOfDay = new Date(selectedDate);
@@ -132,7 +135,7 @@ class TaskService {
             [Op.between]: [startOfDay, endOfDay],
           },
         },
-        order: [["time", "ASC"]],
+        order: [["startTime", "ASC"]],
       });
 
       return tasks;
@@ -195,7 +198,7 @@ class TaskService {
         where: whereClause,
         order: [
           ["date", "ASC"],
-          ["time", "ASC"],
+          ["startTime", "ASC"],
         ],
       });
 

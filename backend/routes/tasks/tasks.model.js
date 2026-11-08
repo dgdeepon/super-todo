@@ -35,7 +35,11 @@ TasksModel.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    time: {
+    startTime: {
+      type: DataTypes.TIME,
+      allowNull: false,
+    },
+    endTime: {
       type: DataTypes.TIME,
       allowNull: false,
     },

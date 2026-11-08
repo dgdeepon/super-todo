@@ -15,7 +15,8 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,7 +27,8 @@ export interface CreateTaskPayload {
   priority: TaskPriority;
   status: TaskStatus;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
 }
 
 export interface EditTaskPayload extends Partial<CreateTaskPayload> {

@@ -10,7 +10,10 @@ import {
   CreateTaskPayload,
   EditTaskPayload,
 } from "@/types/tasks.types";
-import { useCreateTaskMutation, useEditTaskMutation } from "@/queries/tasks.queries";
+import {
+  useCreateTaskMutation,
+  useEditTaskMutation,
+} from "@/queries/tasks.queries";
 import { DateHelper } from "@/utils/date.helper";
 
 interface TaskDrawerProps {
@@ -31,7 +34,8 @@ export default function TaskDrawer({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(selectedDate);
-  const [time, setTime] = useState("09:00");
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("10:00");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [status, setStatus] = useState<TaskStatus>("in_progress");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -40,8 +44,7 @@ export default function TaskDrawer({
   const createTaskMutation = useCreateTaskMutation();
   const editTaskMutation = useEditTaskMutation();
 
-  const isPending =
-    createTaskMutation.isPending || editTaskMutation.isPending;
+  const isPending = createTaskMutation.isPending || editTaskMutation.isPending;
 
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
@@ -61,19 +64,33 @@ export default function TaskDrawer({
         ? String(taskToEdit.date).split("T")[0]
         : selectedDate;
       setDate(formattedDate);
-      setTime(taskToEdit.time ? taskToEdit.time.slice(0, 5) : "09:00");
+      const st = taskToEdit.startTime;
+      setStartTime(st ? st.slice(0, 5) : "09:00");
+      setEndTime(
+        taskToEdit.endTime
+          ? taskToEdit.endTime.slice(0, 5)
+          : st
+            ? st.slice(0, 5)
+            : "10:00",
+      );
       setPriority(taskToEdit.priority || "medium");
       setStatus(taskToEdit.status || "in_progress");
     } else {
       setTitle("");
       setDescription("");
       setDate(selectedDate);
-      setTime(
-        new Date().toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
+      const now = new Date();
+      const nowStr = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setStartTime(nowStr);
+      now.setHours(now.getHours() + 1);
+      const endStr = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setEndTime(endStr);
       setPriority("medium");
       setStatus("in_progress");
     }
@@ -90,7 +107,8 @@ export default function TaskDrawer({
       title: title.trim(),
       description: description.trim() || undefined,
       date,
-      time,
+      startTime,
+      endTime,
       priority,
       status,
     };
@@ -125,8 +143,13 @@ export default function TaskDrawer({
       return;
     }
 
-    if (!time) {
-      setErrorMessage("Please enter a time.");
+    if (!startTime) {
+      setErrorMessage("Please enter a start time.");
+      return;
+    }
+
+    if (!endTime) {
+      setErrorMessage("Please enter an end time.");
       return;
     }
 
@@ -139,7 +162,8 @@ export default function TaskDrawer({
       title: title.trim(),
       description: description.trim() || undefined,
       date,
-      time,
+      startTime,
+      endTime,
       priority,
       status,
     };
@@ -174,13 +198,13 @@ export default function TaskDrawer({
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900">
               {isEditing ? "Edit Task" : "Add New Task"}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-500 hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -204,7 +228,7 @@ export default function TaskDrawer({
             <div>
               <label
                 htmlFor="task-title"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5"
               >
                 Task title
               </label>
@@ -219,25 +243,39 @@ export default function TaskDrawer({
               />
             </div>
 
-            {/* Set Time */}
-            <div>
-              <label
-                htmlFor="task-time"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
-              >
-                Set Time
-              </label>
+            {/* Start Time & End Time in the same row */}
+            <label
+              htmlFor="task-start-time"
+              className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5"
+            >
+              Set Time
+            </label>
+            <div className="grid grid-cols-2 gap-3">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Clock className="w-4 h-4" />
                 </div>
                 <input
-                  id="task-time"
+                  id="task-start-time"
                   type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
                   required
-                  className="w-full border border-slate-200 pl-10 pr-4 py-3 text-slate-900 focus:border-[#4566EC] focus:ring-2 focus:ring-[#4566EC]/20 focus:outline-none text-sm transition-all"
+                  className="w-full border border-slate-200 pl-9 pr-2 py-3 text-slate-900 focus:border-[#4566EC] focus:ring-2 focus:ring-[#4566EC]/20 focus:outline-none text-sm transition-all"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <input
+                  id="task-end-time"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  required
+                  className="w-full border border-slate-200 pl-9 pr-2 py-3 text-slate-900 focus:border-[#4566EC] focus:ring-2 focus:ring-[#4566EC]/20 focus:outline-none text-sm transition-all"
                 />
               </div>
             </div>
@@ -246,7 +284,7 @@ export default function TaskDrawer({
             <div>
               <label
                 htmlFor="task-date"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5"
               >
                 Set Date
               </label>
@@ -266,13 +304,14 @@ export default function TaskDrawer({
                 />
               </div>
               <p className="mt-1 text-[11px] text-slate-400">
-                Tasks can only be created within current week ({minDate} to {maxDate}).
+                Tasks can only be created within current week ({minDate} to{" "}
+                {maxDate}).
               </p>
             </div>
 
             {/* Priority */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5">
                 Priority
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -288,8 +327,8 @@ export default function TaskDrawer({
                           ? p === "high"
                             ? "bg-red-50 border-red-500 text-red-700 font-semibold shadow-xs"
                             : p === "medium"
-                            ? "bg-amber-50 border-amber-500 text-amber-700 font-semibold shadow-xs"
-                            : "bg-emerald-50 border-emerald-500 text-emerald-700 font-semibold shadow-xs"
+                              ? "bg-amber-50 border-amber-500 text-amber-700 font-semibold shadow-xs"
+                              : "bg-emerald-50 border-emerald-500 text-emerald-700 font-semibold shadow-xs"
                           : "border-slate-200 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
@@ -303,7 +342,7 @@ export default function TaskDrawer({
             {/* Status (if editing) */}
             {isEditing && (
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5">
                   Status
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -329,7 +368,7 @@ export default function TaskDrawer({
             <div>
               <label
                 htmlFor="task-description"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-slate-500 tracking-wider mb-1.5"
               >
                 Description
               </label>

@@ -34,7 +34,9 @@ import SwipeableTaskItem from "@/components/SwipeableTaskItem";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated, token } = useAppSelector(
+    (state) => state.auth,
+  );
   const handleLogout = useLogout();
 
   // Authentication check
@@ -51,6 +53,9 @@ export default function DashboardPage() {
   const [weekDays, setWeekDays] = useState<WeekDay[]>([]);
   const [todayStr, setTodayStr] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -61,9 +66,6 @@ export default function DashboardPage() {
     setSelectedDate((prev) => prev || today);
   }, []);
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,37 +83,29 @@ export default function DashboardPage() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Queries
-  const {
-    data: dateTasksResponse,
-    isLoading: isLoadingDateTasks,
-  } = useTasksByDateQuery(selectedDate);
+  const { data: dateTasksResponse, isLoading: isLoadingDateTasks } =
+    useTasksByDateQuery(selectedDate);
 
-  const {
-    data: countSummaryResponse,
-    isLoading: isLoadingSummary,
-  } = useTasksCountSummaryQuery();
+  const { data: countSummaryResponse, isLoading: isLoadingSummary } =
+    useTasksCountSummaryQuery();
 
   const isSearching = debouncedQuery.trim().length > 0;
 
-  const {
-    data: searchResponse,
-    isLoading: isLoadingSearch,
-  } = useSearchTasksQuery(debouncedQuery);
+  const { data: searchResponse, isLoading: isLoadingSearch } =
+    useSearchTasksQuery(debouncedQuery);
 
   // Weekly view state
   const [isWeeklyView, setIsWeeklyView] = useState(false);
   const [weeklyStatus, setWeeklyStatus] = useState<TaskStatus>("in_progress");
 
-  const {
-    data: weeklyTasksResponse,
-    isLoading: isLoadingWeekly,
-  } = useWeeklyTasksQuery(weeklyStatus);
+  const { data: weeklyTasksResponse, isLoading: isLoadingWeekly } =
+    useWeeklyTasksQuery(weeklyStatus);
 
   const weeklyGrouped = weeklyTasksResponse?.data?.groupedByDate || {};
   const weeklyDates = Object.keys(weeklyGrouped).sort();
   const totalWeeklyTasks = weeklyDates.reduce(
     (acc, date) => acc + (weeklyGrouped[date]?.length || 0),
-    0
+    0,
   );
 
   // Mutations
@@ -126,10 +120,10 @@ export default function DashboardPage() {
       return [];
     }
     const tasks = dateTasksResponse?.data?.tasks || [];
-    // Sort tasks by time ascending
+    // Sort tasks by startTime ascending
     return [...tasks].sort((a, b) => {
-      const timeA = a.time || "";
-      const timeB = b.time || "";
+      const timeA = a.startTime || "";
+      const timeB = b.startTime || "";
       return timeA.localeCompare(timeB);
     });
   }, [isSearching, searchResponse, dateTasksResponse]);
@@ -151,8 +145,7 @@ export default function DashboardPage() {
 
   // Handlers
   const handleToggleTaskStatus = (task: Task) => {
-    const newStatus =
-      task.status === "completed" ? "in_progress" : "completed";
+    const newStatus = task.status === "completed" ? "in_progress" : "completed";
     editTaskMutation.mutate({
       id: task.id,
       status: newStatus,
@@ -172,7 +165,7 @@ export default function DashboardPage() {
         onSettled: () => {
           setTaskToDelete(null);
         },
-      }
+      },
     );
   };
 
@@ -446,7 +439,9 @@ export default function DashboardPage() {
                 </p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
                   <span className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    {isLoadingSummary ? "--" : String(summary.completed).padStart(2, "0")}
+                    {isLoadingSummary
+                      ? "--"
+                      : String(summary.completed).padStart(2, "0")}
                   </span>
                   <span className="text-[10px] sm:text-xs text-slate-500 font-medium">
                     This Week
@@ -466,7 +461,9 @@ export default function DashboardPage() {
                 </p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
                   <span className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    {isLoadingSummary ? "--" : String(summary.pending).padStart(2, "0")}
+                    {isLoadingSummary
+                      ? "--"
+                      : String(summary.pending).padStart(2, "0")}
                   </span>
                   <span className="text-[10px] sm:text-xs text-slate-500 font-medium">
                     This Week
@@ -505,10 +502,10 @@ export default function DashboardPage() {
                   {isWeeklyView
                     ? "Weekly Tasks"
                     : isSearching
-                    ? `Search Results (${tasksList.length})`
-                    : selectedDate === todayStr
-                    ? "Tasks Today"
-                    : `Tasks for ${selectedDayObj?.fullDayName || selectedDate}`}
+                      ? `Search Results (${tasksList.length})`
+                      : selectedDate === todayStr
+                        ? "Tasks Today"
+                        : `Tasks for ${selectedDayObj?.fullDayName || selectedDate}`}
                 </h2>
                 {!isSearching && !isWeeklyView && (
                   <p className="text-xs text-slate-500">
@@ -517,7 +514,8 @@ export default function DashboardPage() {
                 )}
                 {isWeeklyView && (
                   <p className="text-xs text-slate-500">
-                    All tasks for this week ({weeklyStatus === "in_progress" ? "Pending" : "Completed"})
+                    All tasks for this week (
+                    {weeklyStatus === "in_progress" ? "Pending" : "Completed"})
                   </p>
                 )}
               </div>
@@ -587,7 +585,9 @@ export default function DashboardPage() {
               isLoadingWeekly ? (
                 <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-2">
                   <div className="w-6 h-6 border-2 border-[#4566EC]/30 border-t-[#4566EC] rounded-full animate-spin" />
-                  <span className="text-xs font-medium">Loading weekly tasks...</span>
+                  <span className="text-xs font-medium">
+                    Loading weekly tasks...
+                  </span>
                 </div>
               ) : totalWeeklyTasks === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center px-4">
@@ -620,7 +620,9 @@ export default function DashboardPage() {
                   {weeklyDates.map((dateStr) => {
                     const tasksForDay = (weeklyGrouped[dateStr] || [])
                       .slice()
-                      .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+                      .sort((a, b) =>
+                        (a.startTime || "").localeCompare(b.startTime || ""),
+                      );
                     if (tasksForDay.length === 0) return null;
 
                     return (
@@ -653,7 +655,9 @@ export default function DashboardPage() {
                   <Check className="w-6 h-6" />
                 </div>
                 <h4 className="text-sm font-semibold text-slate-700">
-                  {isSearching ? "No matching tasks found" : "No tasks for this day"}
+                  {isSearching
+                    ? "No matching tasks found"
+                    : "No tasks for this day"}
                 </h4>
                 <p className="text-xs text-slate-400 max-w-xs mt-1">
                   {isSearching
